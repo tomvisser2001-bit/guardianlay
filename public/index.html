@@ -2,6 +2,65 @@
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>GuardianLay — Waitlist</title></head>
 <body>
+  <h1>GuardianLay — Join the waitlist</h1>
+
+<form id="waitlist" autocomplete="on" novalidate>
+  <input id="email" name="email" type="email" placeholder="you@example.com" required />
+  <!-- Honeypot (bot-trap) -->
+  <input id="company" name="company" type="text" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="off">
+  <button id="btn" type="submit">Join</button>
+  <div id="msg" style="margin-top:8px;font:14px/1.4 system-ui"></div>
+</form>
+
+<script>
+const form = document.getElementById('waitlist');
+const emailEl = document.getElementById('email');
+const hp = document.getElementById('company'); // honeypot
+const btn = document.getElementById('btn');
+const msg = document.getElementById('msg');
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  // simpele validatie
+  const email = emailEl.value.trim();
+  if (!email || !email.includes('@')) {
+    msg.textContent = 'Vul een geldig e-mailadres in.';
+    msg.style.color = '#c00';
+    return;
+  }
+  // bot-trap
+  if (hp.value) return; // bots vullen dit vaak in → stilletjes negeren
+
+  btn.disabled = true;
+  msg.textContent = 'Versturen...';
+  msg.style.color = '#333';
+
+  try {
+    const res = await fetch('/api/waitlist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, source: 'public-form' })
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (res.ok && data.ok) {
+      msg.textContent = 'Gelukt! Je staat op de wachtlijst 🎉';
+      msg.style.color = '#0a0';
+      form.reset();
+    } else {
+      msg.textContent = 'Kon niet inschrijven: ' + (data.error || res.statusText);
+      msg.style.color = '#c00';
+    }
+  } catch (err) {
+    msg.textContent = 'Netwerkfout. Probeer opnieuw.';
+    msg.style.color = '#c00';
+  } finally {
+    btn.disabled = false;
+  }
+});
+</script>
   <h1>GuardianLay — Join the Waitlist</h1>
   <form id="f">
     <input id="email" type="email" placeholder="you@example.com" required>
