@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "functions": {
+    "api/*": {
+      "runtime": "edge"
+    }
+  },
+  "routes": [
+    {
+      "src": "/api/waitlist",
+      "dest": "api/waitlist/index.js"
+    },
+    {
+      "src": "/api/scan",
+      "dest": "api/scan/index.js"
+    }
+  ]
+}
