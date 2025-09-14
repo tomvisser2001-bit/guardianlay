@@ -1,0 +1,38 @@
+<!doctype html><html lang="nl"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GuardianLay — Voorbeeldrapport</title>
+<style>
+body{font-family:system-ui;background:#fafafa;margin:0;color:#111}
+.wrap{max-width:900px;margin:0 auto;padding:24px}
+.card{background:#fff;border:1px solid #eee;border-radius:12px;padding:18px;margin:12px 0}
+.progress{height:12px;background:#eee;border-radius:999px;overflow:hidden}
+.progress>span{display:block;height:100%;background:linear-gradient(90deg,#2dd,#26a);width:72%}
+.small{color:#666}
+.find{border-left:6px solid #bbb;padding-left:12px;margin:12px 0}
+.find.High{border-color:#d33}.find.Medium{border-color:#e69f00}.find.Low{border-color:#aaa}
+</style></head><body>
+<div class="wrap">
+  <div class="card">
+    <h1>Voorbeeldrapport — voorbeeldsite.nl</h1>
+    <div class="progress"><span></span></div>
+    <p><strong>Score:</strong> 72/100 — <strong>Risico:</strong> Medium</p>
+    <p class="small">Dit is een voorbeeld. Echte rapporten bevatten jouw site-specifieke bevindingen en fixes.</p>
+  </div>
+  <div class="card">
+    <h2>Belangrijkste bevindingen</h2>
+    <div class="find High">
+      <h3>Trackers zonder zichtbare toestemming</h3>
+      <p><strong>Bewijs:</strong> GA4 en Meta Pixel laden vóór consent.</p>
+      <p><strong>Fix:</strong> Consent Mode v2 en GTM blokkerende regels toepassen.</p>
+    </div>
+    <div class="find Medium">
+      <h3>Cookiebanner onvolledig</h3>
+      <p><strong>Fix:</strong> Voeg “Weigeren” & “Instellingen” toe, log granular consent.</p>
+    </div>
+    <div class="find Low">
+      <h3>Security headers ontbreken</h3>
+      <p><strong>Fix:</strong> Voeg CSP, HSTS, X-Frame-Options, Referrer-Policy toe.</p>
+    </div>
+  </div>
+</div>
+</body></html>
