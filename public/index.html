@@ -1,107 +1,48 @@
-<!doctype html>
-<html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>GuardianLay — Waitlist</title></head>
-<body>
-  <section style="max-width:820px;margin:40px auto;padding:24px;font-family:system-ui">
-  <h1 style="font-size:36px;line-height:1.15;margin:0 0 10px;">
-    Maak je website <span style="white-space:nowrap">AVG-proof</span> & veilig — automatisch
-  </h1>
-  <p style="font-size:18px;color:#444;margin:0 0 14px;">
-    GuardianLay scant je site op privacy- en AVG-fouten en geeft een helder rapport met fixes.
-    Voorkom boetes en reputatieschade — zonder gedoe.
-  </p>
+<section id="scan" style="max-width:820px;margin:24px auto;padding:16px;border:1px solid #eee;border-radius:12px;background:#fff;font-family:system-ui">
+  <h2>Gratis quick scan</h2>
 
-  <div style="display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 8px;">
-    <a href="#scan" style="background:#111;color:#fff;padding:10px 14px;border-radius:10px;text-decoration:none;font-weight:600">
-      Gratis quick scan
-    </a>
-    <a href="/report-sample.html" style="padding:10px 14px;border:1px solid #ddd;border-radius:10px;text-decoration:none;">
-      Voorbeeldrapport bekijken
-    </a>
-  </div>
+  <form id="scanForm">
+    <input id="scanUrl" type="url" placeholder="https://jouwsite.nl" required style="padding:10px;width:68%">
+    <input id="scanEmail" type="email" placeholder="jij@bedrijf.nl" required style="padding:10px;width:68%;margin-top:6px">
+    <button id="scanBtn" style="padding:10px 16px;margin-top:8px">Scan</button>
+  </form>
 
-  <ul style="margin:14px 0 0;color:#555;line-height:1.55">
-    <li>Detecteert trackers (GA4, Meta, Hotjar) & ontbrekende consent</li>
-    <li>Checkt security headers & cookies vóór toestemming</li>
-    <li>Helder stappenplan: wat moet je fixen en hoe</li>
-  </ul>
+  <div id="scanMsg" style="margin-top:10px;font-size:14px"></div>
 </section>
 
-  <h1>GuardianLay — Join the waitlist</h1>
-
-<form id="waitlist" autocomplete="on" novalidate>
-  <input id="email" name="email" type="email" placeholder="you@example.com" required />
-  <!-- Honeypot (bot-trap) -->
-  <input id="company" name="company" type="text" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="off">
-  <button id="btn" type="submit">Join</button>
-  <div id="msg" style="margin-top:8px;font:14px/1.4 system-ui"></div>
-</form>
-
 <script>
-const form = document.getElementById('waitlist');
-const emailEl = document.getElementById('email');
-const hp = document.getElementById('company'); // honeypot
-const btn = document.getElementById('btn');
-const msg = document.getElementById('msg');
+const form = document.getElementById('scanForm');
+const urlEl = document.getElementById('scanUrl');
+const emailEl = document.getElementById('scanEmail');
+const btn = document.getElementById('scanBtn');
+const msg = document.getElementById('scanMsg');
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
-
-  // simpele validatie
-  const email = emailEl.value.trim();
-  if (!email || !email.includes('@')) {
-    msg.textContent = 'Vul een geldig e-mailadres in.';
-    msg.style.color = '#c00';
-    return;
-  }
-  // bot-trap
-  if (hp.value) return; // bots vullen dit vaak in → stilletjes negeren
-
-  btn.disabled = true;
-  msg.textContent = 'Versturen...';
-  msg.style.color = '#333';
+  msg.textContent = '';
+  btn.disabled = true; btn.textContent = 'Scannen...';
 
   try {
-    const res = await fetch('/api/waitlist', {
+    const res = await fetch('/api/scan', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, source: 'public-form' })
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        url: urlEl.value.trim(),
+        email: emailEl.value.trim()
+      })
     });
 
-    const data = await res.json().catch(() => ({}));
-
+    const data = await res.json().catch(()=>({ ok:false, error:'bad_json' }));
     if (res.ok && data.ok) {
-      msg.textContent = 'Gelukt! Je staat op de wachtlijst 🎉';
-      msg.style.color = '#0a0';
-      form.reset();
+      msg.innerHTML = `Klaar ✅ Score: <b>${data.score}</b> — 
+        <a href="${data.report_url}" target="_blank" rel="noopener">Bekijk rapport</a>`;
     } else {
-      msg.textContent = 'Kon niet inschrijven: ' + (data.error || res.statusText);
-      msg.style.color = '#c00';
+      msg.textContent = 'Mislukt: ' + (data.error || res.statusText);
     }
   } catch (err) {
-    msg.textContent = 'Netwerkfout. Probeer opnieuw.';
-    msg.style.color = '#c00';
+    msg.textContent = 'Fout: ' + err.message;
   } finally {
-    btn.disabled = false;
+    btn.disabled = false; btn.textContent = 'Scan';
   }
 });
 </script>
-  <h1>GuardianLay — Join the Waitlist</h1>
-  <form id="f">
-    <input id="email" type="email" placeholder="you@example.com" required>
-    <button>Join</button>
-  </form>
-  <pre id="out"></pre>
-  <script>
-    document.getElementById('f').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const r = await fetch('/api/waitlist', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ email: document.getElementById('email').value.trim(), source:'public-form' })
-      });
-      try { document.getElementById('out').textContent = JSON.stringify(await r.json(), null, 2); }
-      catch { document.getElementById('out').textContent = 'Non-JSON response'; }
-    });
-  </script>
-</body></html>
