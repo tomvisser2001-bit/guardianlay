@@ -1,48 +1,237 @@
-<section id="scan" style="max-width:820px;margin:24px auto;padding:16px;border:1px solid #eee;border-radius:12px;background:#fff;font-family:system-ui">
-  <h2>Gratis quick scan</h2>
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>GuardianLay — Maak je website AVG-proof & veilig — automatisch</title>
+  <meta name="description" content="GuardianLay scant je site op cookies/trackers, consent en security headers en geeft een helder rapport met fixes. Gratis quick scan. NL-focussed." />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <meta name="theme-color" content="#0d1117" />
 
-  <form id="scanForm">
-    <input id="scanUrl" type="url" placeholder="https://jouwsite.nl" required style="padding:10px;width:68%">
-    <input id="scanEmail" type="email" placeholder="jij@bedrijf.nl" required style="padding:10px;width:68%;margin-top:6px">
-    <button id="scanBtn" style="padding:10px 16px;margin-top:8px">Scan</button>
-  </form>
+  <!-- Open Graph / Twitter -->
+  <meta property="og:title" content="GuardianLay — AVG-proof & veilig — automatisch" />
+  <meta property="og:description" content="Snelle scan op cookies/trackers, consent en security headers met duidelijk rapport. Gratis quick scan." />
+  <meta property="og:url" content="https://guardianlay.com" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
 
-  <div id="scanMsg" style="margin-top:10px;font-size:14px"></div>
-</section>
-
-<script>
-const form = document.getElementById('scanForm');
-const urlEl = document.getElementById('scanUrl');
-const emailEl = document.getElementById('scanEmail');
-const btn = document.getElementById('scanBtn');
-const msg = document.getElementById('scanMsg');
-
-form.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  msg.textContent = '';
-  btn.disabled = true; btn.textContent = 'Scannen...';
-
-  try {
-    const res = await fetch('/api/scan', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({
-        url: urlEl.value.trim(),
-        email: emailEl.value.trim()
-      })
-    });
-
-    const data = await res.json().catch(()=>({ ok:false, error:'bad_json' }));
-    if (res.ok && data.ok) {
-      msg.innerHTML = `Klaar ✅ Score: <b>${data.score}</b> — 
-        <a href="${data.report_url}" target="_blank" rel="noopener">Bekijk rapport</a>`;
-    } else {
-      msg.textContent = 'Mislukt: ' + (data.error || res.statusText);
+  <!-- Critical CSS (rest in styles.css) -->
+  <style>
+    :root {
+      --bg:#0d1117; --card:#0f1420; --muted:#9aa4b2; --fg:#e7ecf3;
+      --brand:#4cc9f0; --brand2:#4895ef; --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444;
+      --ring: 0 0 0 3px rgba(72,149,239,.35);
     }
-  } catch (err) {
-    msg.textContent = 'Fout: ' + err.message;
-  } finally {
-    btn.disabled = false; btn.textContent = 'Scan';
+    *{box-sizing:border-box} html,body{margin:0}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(1200px 700px at 80% -20%,#1b2a4a 0%,transparent 60%), var(--bg); color:var(--fg)}
+    a{color:inherit}
+    .container{max-width:1120px;margin:0 auto;padding:20px}
+    .nav{position:sticky;top:0;background:rgba(13,17,23,.6);backdrop-filter:saturate(140%) blur(10px);border-bottom:1px solid #1f2937;z-index:50}
+    .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .logo{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.2px}
+    .logo svg{width:26px;height:26px}
+    .btn{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--brand2),var(--brand));color:#00101a;font-weight:700;text-decoration:none;padding:10px 14px;border-radius:12px;box-shadow:0 6px 30px rgba(76,201,240,.2)}
+    .btn.secondary{background:transparent;color:var(--fg);border:1px solid #22304b}
+    .btn:focus-visible{outline:none;box-shadow:var(--ring)}
+    .hero{padding:48px 0 18px}
+    .hero h1{font-size:42px;line-height:1.1;margin:.1em 0}
+    .hero p{color:var(--muted);font-size:18px;max-width:720px}
+    .badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+    .badge{font-size:12px;color:#9cc2ff;border:1px solid #244166;background:#0e1a2d;border-radius:999px;padding:6px 10px}
+    .grid{display:grid;gap:16px}
+    @media(min-width:900px){ .grid-2{grid-template-columns:1.1fr .9fr} }
+    .card{background:var(--card);border:1px solid #1f2937;border-radius:14px;padding:18px}
+    .card h3{margin:.2em 0 .5em}
+    input, button{font:inherit}
+    input{width:100%;background:#0a0f18;color:var(--fg);border:1px solid #1d2433;border-radius:10px;padding:10px 12px}
+    input:focus-visible{outline:none;box-shadow:var(--ring);border-color:#2a3a5f}
+    .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+    .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+    .kpi{background:#0e1524;border:1px solid #18233a;border-radius:12px;padding:12px;text-align:center}
+    .kpi b{font-size:20px}
+    .list{display:grid;gap:10px}
+    .list li{list-style:none;background:#0e1524;border:1px solid #18233a;border-radius:10px;padding:10px}
+    .muted{color:var(--muted)}
+    .progress{height:10px;background:#0d1320;border-radius:999px;overflow:hidden}
+    .bar{height:100%;background:linear-gradient(90deg,#2dd,#26a)}
+    .footer{border-top:1px solid #1f2937;margin-top:40px;padding:24px 0;color:#9aa4b2;font-size:14px}
+  </style>
+  <link rel="preload" as="style" href="/styles.css" onload="this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="/styles.css"></noscript>
+
+  <!-- JSON-LD Organization -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"Organization",
+    "name":"GuardianLay",
+    "url":"https://guardianlay.com",
+    "logo":"https://guardianlay.com/favicon.svg",
+    "sameAs":[]
   }
-});
-</script>
+  </script>
+</head>
+<body>
+  <header class="nav">
+    <div class="container row" role="navigation" aria-label="Hoofdnavigatie">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="url(#g)" d="M12 2l7 4v6c0 5-3 8-7 10-4-2-7-5-7-10V6l7-4z"/><defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#4895ef"/><stop offset="1" stop-color="#4cc9f0"/></linearGradient></defs></svg>
+        <span>GuardianLay</span>
+      </div>
+      <nav class="row" style="gap:8px">
+        <a class="btn secondary" href="#features">Features</a>
+        <a class="btn secondary" href="#pricing">Prijzen</a>
+        <a class="btn" href="#scan">Gratis quick scan</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section class="container hero">
+      <div class="grid grid-2">
+        <div>
+          <h1>Maak je website <span style="white-space:nowrap">AVG-proof</span> & veilig — automatisch</h1>
+          <p>GuardianLay scant je site op cookies/trackers, consent (Google Consent Mode v2), en security headers. Je krijgt een helder rapport met concrete fixes. Geen gedoe, NL-gericht.</p>
+          <div class="actions">
+            <a class="btn" href="#scan" aria-label="Start gratis quick scan">Gratis quick scan</a>
+            <a class="btn secondary" href="#waitlist" aria-label="Schrijf je in op de wachtlijst">Wachtlijst</a>
+          </div>
+          <div class="badges" aria-label="Highlights">
+            <span class="badge">Consent & cookies</span>
+            <span class="badge">Security headers</span>
+            <span class="badge">HTML-rapport</span>
+            <span class="badge">NL-markt</span>
+          </div>
+          <div class="kpis" aria-hidden="true">
+            <div class="kpi"><b>~60s</b><div class="muted">scan tijd</div></div>
+            <div class="kpi"><b>+90%</b><div class="muted">duidelijke fixes</div></div>
+            <div class="kpi"><b>0 cookies</b><div class="muted">zonder consent</div></div>
+          </div>
+        </div>
+        <aside class="card" aria-label="Voorbeeldrapport">
+          <h3 style="margin-top:0">Voorbeeldrapport</h3>
+          <div class="progress" aria-label="Voorbeeldscore">
+            <div class="bar" style="width:72%"></div>
+          </div>
+          <p class="muted" style="margin:8px 0 0">Score: 72/100 — Risico: Medium</p>
+          <ul class="list" style="margin-top:10px">
+            <li><b>Trackers zonder consent</b> — GA4/Meta vóór akkoord → blokkeer tot toestemming.</li>
+            <li><b>Cookiebanner onvolledig</b> — voeg ‘Weigeren’/‘Instellingen’ toe.</li>
+            <li><b>Security headers ontbrekend</b> — CSP/HSTS/X-Frame-Options/Referrer-Policy.</li>
+          </ul>
+          <p style="margin-top:10px"><a class="btn secondary" href="#scan">Eigen rapport genereren →</a></p>
+        </aside>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section id="features" class="container" style="margin-top:10px">
+      <div class="grid grid-2">
+        <div class="card">
+          <h3>Cookies & Trackers</h3>
+          <p class="muted">Detecteert GA4/GTM, Meta Pixel, Hotjar en checkt of ze pas na toestemming laden.</p>
+        </div>
+        <div class="card">
+          <h3>Consent Mode v2</h3>
+          <p class="muted">Checkt signalen voor Google Consent Mode v2 en waarschuwt bij ontbrekende consent-events.</p>
+        </div>
+        <div class="card">
+          <h3>Security headers</h3>
+          <p class="muted">CSP, HSTS, X-Frame-Options en Referrer-Policy: snelle check + concrete fix-tips.</p>
+        </div>
+        <div class="card">
+          <h3>Heldere rapporten</h3>
+          <p class="muted">HTML-rapport met score, bewijs en stappenplan. Deelbaar met je webbouwer of direct uitvoerbaar.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCAN -->
+    <section id="scan" class="container" style="margin-top:18px">
+      <div class="card">
+        <h3>Gratis quick scan</h3>
+        <form id="scanForm" class="grid" style="gap:10px">
+          <label>
+            <span class="muted">Website URL</span>
+            <input id="scanUrl" type="url" placeholder="https://jouwsite.nl" required inputmode="url" />
+          </label>
+          <label>
+            <span class="muted">E-mail voor rapportlink</span>
+            <input id="scanEmail" type="email" placeholder="jij@bedrijf.nl" required inputmode="email" />
+          </label>
+          <button id="scanBtn" class="btn" type="submit" style="width:max-content">Scan nu</button>
+        </form>
+        <div id="scanMsg" class="muted" style="margin-top:10px"></div>
+      </div>
+    </section>
+
+    <!-- PRICING -->
+    <section id="pricing" class="container" style="margin-top:18px">
+      <div class="grid grid-2">
+        <div class="card">
+          <h3>Fix Plan</h3>
+          <p class="muted">Eenmalig pakket: wij leveren fixes & documentatie op. Ideaal als je snel compliant wilt zijn.</p>
+          <ul class="list"><li>Cookiebanner + Consent Mode v2</li><li>Security headers baseline</li><li>Korte implementatiegids</li></ul>
+          <a class="btn" href="#waitlist">Interesse</a>
+        </div>
+        <div class="card">
+          <h3>Pro (maandelijks)</h3>
+          <p class="muted">Monitoring + her-scan, rapportage en updates. Handig voor continue zekerheid.</p>
+          <ul class="list"><li>Maandelijkse scan & rapport</li><li>Wijzigingen-alerts</li><li>Prioriteitssupport</li></ul>
+          <a class="btn" href="#waitlist">Op de lijst</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- WAITLIST -->
+    <section id="waitlist" class="container" style="margin-top:18px">
+      <div class="card">
+        <h3>Wachtlijst</h3>
+        <p class="muted">We openen gefaseerd. Schrijf je in; we mailen je zodra je aan de beurt bent.</p>
+        <form id="wlForm" class="grid" style="gap:10px">
+          <label><span class="muted">E-mail</span><input id="wlEmail" type="email" placeholder="jij@bedrijf.nl" required /></label>
+          <button id="wlBtn" class="btn" type="submit" style="width:max-content">Inschrijven</button>
+        </form>
+        <div id="wlMsg" class="muted" style="margin-top:10px"></div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="container" style="margin-top:18px">
+      <div class="card">
+        <h3>Veelgestelde vragen</h3>
+        <details><summary>Is de quick scan juridisch advies?</summary><p class="muted">Nee. Het is een snelle technisch-functionele check met duidelijke verbeterpunten.</p></details>
+        <details><summary>Wat als er toch een datalek is?</summary><p class="muted">Geen enkele tool kan 100% veiligheid garanderen. We bieden wel incident-analyse als aparte dienst.</p></details>
+        <details><summary>Werkt dit voor alle CMS’en (Shopify/WordPress)?</summary><p class="muted">Ja. We scannen de publieke site; fixes zijn CMS-agnostisch.</p></details>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container row">
+      <div class="muted">© <span id="y"></span> GuardianLay — NL-gericht. Geen juridisch advies.</div>
+      <div class="row" style="gap:8px">
+        <a class="muted" href="#waitlist">Contact</a>
+        <a class="muted" href="/sitemap.xml">Sitemap</a>
+        <a class="muted" href="/robots.txt">Robots</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Minimal consent banner (future-proof; geen trackers geladen zonder akkoord) -->
+  <div id="consent" style="position:fixed;inset:auto 12px 12px 12px;background:#0f1420;border:1px solid #1f2937;border-radius:12px;padding:12px;display:none;z-index:60">
+    <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap">
+      <div class="muted">We gebruiken alleen noodzakelijke cookies. Voor analytics vragen we toestemming.</div>
+      <div class="row" style="gap:8px">
+        <button id="cReject" class="btn secondary" type="button">Weiger</button>
+        <button id="cAccept" class="btn" type="button">Akkoord</button>
+      </div>
+    </div>
+  </div>
+
+  <script defer src="/app.js"></script>
+  <script>document.getElementById('y').textContent=new Date().getFullYear()</script>
+</body>
+</html>
