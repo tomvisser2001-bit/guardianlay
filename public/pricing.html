@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>GuardianLay — Prijzen</title>
+  <meta name="description" content="Kies je plan: Fix Plan (eenmalig) of Pro (maandelijks). Betaal veilig via Stripe." />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <meta property="og:title" content="GuardianLay — Prijzen" />
+  <meta property="og:description" content="Fix Plan of Pro. Betaal via Stripe." />
+  <meta property="og:image" content="/og-image.png" />
+  <style>
+    :root { --bg:#0d1117; --fg:#e7ecf3; --muted:#9aa4b2; --card:#0f1420; --brand:#4895ef; }
+    *{box-sizing:border-box} html,body{margin:0}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .wrap{max-width:1000px;margin:0 auto;padding:24px}
+    .title{display:flex;justify-content:space-between;align-items:center;gap:12px}
+    a{color:inherit;text-decoration:none}
+    .btn{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#4895ef,#4cc9f0);color:#00101a;font-weight:700;padding:10px 14px;border-radius:12px}
+    .grid{display:grid;gap:16px}
+    @media(min-width:900px){ .grid{grid-template-columns:1fr 1fr} }
+    .card{background:var(--card);border:1px solid #1f2937;border-radius:14px;padding:18px}
+    .price{font-size:32px;font-weight:800}
+    ul{margin:10px 0 0;padding:0;list-style:none}
+    li{background:#0e1524;border:1px solid #18233a;border-radius:10px;padding:8px;margin-top:8px}
+    .muted{color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="title">
+      <h1 style="margin:0">Prijzen</h1>
+      <a class="btn" href="/">← Terug</a>
+    </div>
+
+    <div class="grid" style="margin-top:16px">
+      <section class="card">
+        <h2 style="margin-top:0">Fix Plan</h2>
+        <div class="price">€ 49</div>
+        <p class="muted">Eenmalig: wij leveren fixes & documentatie om snel compliant te zijn.</p>
+        <ul>
+          <li>Cookiebanner + Consent Mode v2 (advies/implementatieplan)</li>
+          <li>Security headers baseline (CSP/HSTS/XFO/Referrer-Policy)</li>
+          <li>Korte implementatiegids</li>
+        </ul>
+        <p style="margin-top:12px">
+          <button id="buy-fix" class="btn" type="button" aria-label="Koop Fix Plan">Koop Fix Plan</button>
+        </p>
+      </section>
+
+      <section class="card">
+        <h2 style="margin-top:0">Pro</h2>
+        <div class="price">€ 29 <span class="muted" style="font-size:16px">/ maand</span></div>
+        <p class="muted">Monitoring + her-scan, rapportage en updates — continu zekerheid.</p>
+        <ul>
+          <li>Maandelijkse scan & HTML-rapport</li>
+          <li>Wijzigingen-alerts</li>
+          <li>Prioriteitssupport</li>
+        </ul>
+        <p style="margin-top:12px">
+          <button id="buy-pro" class="btn" type="button" aria-label="Neem Pro abonnement">Neem Pro</button>
+        </p>
+      </section>
+    </div>
+
+    <div id="msg" class="muted" style="margin-top:12px"></div>
+  </div>
+
+  <script>
+    async function checkout(mode){
+      const msg = document.getElementById('msg'); msg.textContent = 'Doorsturen naar betaalpagina...';
+      const res = await fetch('/api/checkout', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ mode }) // 'fix' of 'pro'
+      });
+      const data = await res.json().catch(()=>({}));
+      if(res.ok && data.url){ location.href = data.url; }
+      else { msg.textContent = 'Mislukt: ' + (data.error || res.statusText); }
+    }
+    document.getElementById('buy-fix').onclick = ()=>checkout('fix');
+    document.getElementById('buy-pro').onclick = ()=>checkout('pro');
+  </script>
+</body>
+</html>
