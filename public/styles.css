@@ -1,0 +1,10 @@
+/* Extra UI details die niet critical zijn */
+h1,h2,h3 { font-weight:800; letter-spacing:.2px }
+details { background:#0e1524; border:1px solid #18233a; border-radius:10px; padding:10px; margin:8px 0 }
+details[open] { background:#0f1a30 }
+summary { cursor:pointer; font-weight:600 }
+summary::-webkit-details-marker{display:none}
+
+@media (max-width: 640px){
+  .hero h1{ font-size:34px }
+}
