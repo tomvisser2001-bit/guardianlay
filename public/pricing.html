@@ -6,90 +6,197 @@
   <title>Prijzen — GuardianLay</title>
   <meta name="description" content="Kies tussen Quick Fix (eenmalig) of Pro (maandelijks). Betaal veilig via Stripe." />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <meta property="og:title" content="Prijzen — GuardianLay" />
+  <meta property="og:description" content="Quick Fix of Pro. Snel compliant, rapport met fixes, NL-gericht." />
+  <meta property="og:image" content="/assets/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+
   <style>
-    :root{--bg:#0d1117;--fg:#e7ecf3;--muted:#9aa4b2;--card:#0f1420;--brand:#4895ef}
+    :root{
+      --bg:#0d1117;--fg:#e7ecf3;--muted:#9aa4b2;--card:#0f1420;--line:#1f2937;
+      --brand1:#4895ef;--brand2:#4cc9f0;--ok:#22c55e;
+    }
     *{box-sizing:border-box} html,body{margin:0}
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--fg)}
-    .wrap{max-width:1100px;margin:0 auto;padding:24px}
+    body{
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      color:var(--fg);
+      background:
+        radial-gradient(1200px 700px at 80% -20%,#14213d 0%,transparent 60%) ,
+        var(--bg);
+    }
     a{color:inherit;text-decoration:none}
-    .btn{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#4895ef,#4cc9f0);color:#00101a;font-weight:800;padding:12px 16px;border-radius:12px}
-    .btn.secondary{background:transparent;color:var(--fg);border:1px solid #22304b}
-    header{display:flex;justify-content:space-between;align-items:center}
-    .grid{display:grid;gap:16px;margin-top:18px}
-    @media(min-width:900px){ .grid{grid-template-columns:1fr 1fr} }
-    .card{background:var(--card);border:1px solid #1f2937;border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px}
-    .price{font-size:34px;font-weight:900}
-    ul{margin:8px 0 0;padding:0;list-style:none}
-    li{background:#0e1524;border:1px solid #18233a;border-radius:10px;padding:8px;margin-top:8px}
+    .container{max-width:1100px;margin:0 auto;padding:24px}
+    .nav{position:sticky;top:0;z-index:20;background:rgba(13,17,23,.6);backdrop-filter:saturate(140%) blur(10px);border-bottom:1px solid var(--line)}
+    .row{display:flex;align-items:center;gap:10px}
+    .logo{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:.2px}
+    .logo img{width:24px;height:24px}
+    .btn{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--brand2),var(--brand1));color:#00101a;font-weight:800;padding:12px 16px;border-radius:12px;box-shadow:0 8px 30px rgba(72,149,239,.25)}
+    .btn.secondary{background:transparent;color:var(--fg);border:1px solid #22304b;box-shadow:none}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .hero{padding:28px 0 8px}
+    .hero h1{margin:.1em 0;font-size:40px}
     .muted{color:var(--muted)}
-    .img{width:72px;height:72px;border-radius:12px;background:#0e1524;border:1px solid #18233a;display:flex;align-items:center;justify-content:center;overflow:hidden}
-    .img img{max-width:100%;max-height:100%}
-    .note{margin-top:10px;color:var(--muted)}
+    .badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .badge{font-size:12px;color:#9cc2ff;border:1px solid #244166;background:#0e1a2d;border-radius:999px;padding:6px 10px}
+    .cards{display:grid;gap:16px;margin-top:18px}
+    @media(min-width:900px){ .cards{grid-template-columns:1fr 1fr} }
+    .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:12px;position:relative;overflow:hidden}
+    .ribbon{position:absolute;top:14px;right:-22px;transform:rotate(35deg);background:#183055;color:#9cc2ff;font-size:12px;padding:6px 28px;border:1px solid #2a457d}
+    .media{display:flex;gap:12px;align-items:center}
+    .thumb{width:76px;height:76px;border-radius:12px;background:#0e1524;border:1px solid #18233a;display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .thumb img{max-width:100%;max-height:100%}
+    .price{font-size:36px;font-weight:900}
+    .per{font-size:16px}
+    .list{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+    .list li{background:#0e1524;border:1px solid #18233a;border-radius:10px;padding:10px}
+    .cta{display:flex;gap:10px;flex-wrap:wrap}
+    .note{color:var(--muted);margin-top:8px}
+    .trust{display:grid;gap:10px;margin-top:18px}
+    @media(min-width:900px){ .trust{grid-template-columns:1fr 1fr 1fr} }
+    .trust .t{background:#0e1524;border:1px solid #18233a;border-radius:12px;padding:12px}
+    .footer{border-top:1px solid var(--line);margin-top:28px}
+    .footer .row{justify-content:space-between;flex-wrap:wrap}
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <h1 style="margin:0">Prijzen</h1>
-      <a class="btn secondary" href="/">← Terug</a>
-    </header>
+  <!-- NAV -->
+  <header class="nav">
+    <div class="container row" role="navigation" aria-label="Hoofdnavigatie">
+      <a href="/" class="logo"><img src="/favicon.svg" alt="" />GuardianLay</a>
+      <nav class="row" style="gap:8px">
+        <a class="btn secondary" href="/">Home</a>
+        <a class="btn secondary" href="/#scan">Quick scan</a>
+        <a class="btn" href="/pricing.html">Prijzen</a>
+      </nav>
+    </div>
+  </header>
 
-    <div id="plans" class="grid" aria-live="polite"></div>
-    <div id="msg" class="note"></div>
-  </div>
+  <main>
+    <!-- HERO -->
+    <section class="container hero">
+      <h1>Prijzen</h1>
+      <p class="muted" style="max-width:720px">
+        Kies wat past: <b>Quick Fix</b> (eenmalig) om snel compliant te worden, of <b>Pro</b> (maandelijks)
+        voor monitoring, her-scans en updates. Afrekenen via Stripe.
+      </p>
+      <div class="badges">
+        <span class="badge">AVG/consent</span>
+        <span class="badge">Security headers</span>
+        <span class="badge">Deelbaar rapport</span>
+      </div>
+    </section>
+
+    <!-- CARDS -->
+    <section class="container">
+      <div id="cards" class="cards" aria-live="polite">
+        <!-- skeletons -->
+        <article class="card"><div class="media"><div class="thumb"></div><div><h2 style="margin:0">Quick Fix</h2><div class="muted">Laden…</div></div></div><div class="price">—</div><ul class="list"><li>Laden…</li><li>Laden…</li><li>Laden…</li></ul><div class="cta"><button class="btn" disabled>Klaarzetten…</button></div></article>
+        <article class="card"><span class="ribbon">Meest gekozen</span><div class="media"><div class="thumb"></div><div><h2 style="margin:0">Pro</h2><div class="muted">Laden…</div></div></div><div class="price">—</div><ul class="list"><li>Laden…</li><li>Laden…</li><li>Laden…</li></ul><div class="cta"><button class="btn" disabled>Klaarzetten…</button></div></article>
+      </div>
+      <p id="msg" class="note"></p>
+
+      <!-- trust row -->
+      <div class="trust container">
+        <div class="t">⚡ <b>Snel & licht</b><br><span class="muted">Scan + rapport in minuten, geen zware scripts.</span></div>
+        <div class="t">🔒 <b>Veilig afrekenen</b><br><span class="muted">Stripe Checkout met 3D-Secure waar nodig.</span></div>
+        <div class="t">✅ <b>NL-gericht</b><br><span class="muted">Consent Mode v2 & cookie-eisen voor de NL-markt.</span></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container row" style="gap:16px">
+      <div>
+        <div class="muted">© <span id="y"></span> GuardianLay</div>
+        <div class="muted" style="font-size:13px">NL-gericht · Geen juridisch advies</div>
+      </div>
+      <nav class="row" style="gap:12px;flex-wrap:wrap">
+        <a class="muted" href="/privacy.html">Privacy</a>
+        <a class="muted" href="/cookies.html">Cookies</a>
+        <a class="muted" href="/terms.html">Voorwaarden</a>
+        <a class="muted" href="/sitemap.xml">Sitemap</a>
+      </nav>
+    </div>
+  </footer>
 
   <script>
-    async function loadPlans(){
-      const wrap = document.getElementById('plans');
-      const msg  = document.getElementById('msg');
-      msg.textContent = 'Prijzen laden...';
-      try{
-        const r = await fetch('/api/prices');
-        const data = await r.json();
-        if(!r.ok) throw new Error(data.error || 'error');
-        wrap.innerHTML = '';
-        data.plans.forEach(p=>{
-          const interval = p.interval==='one_time' ? 'eenmalig' :
-                           (p.interval==='month' ? 'per maand' : p.interval);
-          const el = document.createElement('section');
-          el.className = 'card';
-          el.innerHTML = `
-            <div style="display:flex;gap:12px;align-items:center">
-              <div class="img">${p.img ? `<img src="${p.img}" alt="">` : ''}</div>
-              <div>
-                <h2 style="margin:0">${p.name ?? (p.key==='fix'?'Quick Fix':'Pro')}</h2>
-                <div class="muted">${p.description ?? ''}</div>
-              </div>
-            </div>
-            <div class="price">€ ${p.amount.toFixed(0)} <span class="muted" style="font-size:16px"> ${interval}</span></div>
-            <ul>
-              ${p.key==='fix'
-                ? `<li>Volledig rapport + aanbevelingen</li><li>Cookies/trackers & Consent Mode v2</li><li>Security headers check</li>`
-                : `<li>Maandelijkse scan & rapportage</li><li>Alerts bij nieuwe risico's</li><li>Prioriteitssupport</li>`}
-            </ul>
-            <div><button class="btn" onclick="checkout('${p.key}')">${p.key==='fix'?'Koop Quick Fix':'Neem Pro'}</button></div>
-          `;
-          wrap.appendChild(el);
-        });
-        msg.textContent = '';
-      }catch(e){
-        msg.textContent = 'Kon prijzen niet laden: ' + e.message;
+  const euro = v => new Intl.NumberFormat('nl-NL',{style:'currency',currency:'EUR'}).format(v);
+
+  function planHTML(p){
+    const interval = p.interval==='one_time' ? 'eenmalig' :
+                     (p.interval==='month' ? 'per maand' : p.interval);
+    const features = p.key==='fix'
+      ? ['Volledig rapport + aanbevelingen','Cookies/trackers & Consent Mode v2','Security headers baseline']
+      : ['Maandelijkse scan & rapportage','Alerts bij wijzigingen/risico’s','Prioriteitssupport'];
+
+    return `
+      ${p.key==='pro' ? '<span class="ribbon">Meest gekozen</span>' : ''}
+      <div class="media">
+        <div class="thumb">${p.img?`<img src="${p.img}" alt="">`:''}</div>
+        <div>
+          <h2 style="margin:0">${p.name ?? (p.key==='fix'?'Quick Fix':'Pro')}</h2>
+          <div class="muted">${p.description ?? ''}</div>
+        </div>
+      </div>
+      <div class="price">${euro(p.amount)} <span class="muted per">${interval}</span></div>
+      <ul class="list">${features.map(f=>`<li>${f}</li>`).join('')}</ul>
+      <div class="cta">
+        <button class="btn" data-mode="${p.key}">${p.key==='fix'?'Koop Quick Fix':'Neem Pro'}</button>
+        <a class="btn secondary" href="/#waitlist">Meer info</a>
+      </div>
+      <div class="note" id="n-${p.key}"></div>
+    `;
+  }
+
+  async function loadPlans(){
+    const wrap = document.getElementById('cards');
+    const msg  = document.getElementById('msg');
+    try{
+      const r = await fetch('/api/prices',{cache:'no-store'});
+      const data = await r.json();
+      if(!r.ok) throw new Error(data.error || 'Onbekende fout');
+      if(!data || !Array.isArray(data.plans)) throw new Error('Onverwacht prijzen-formaat');
+
+      const order = {fix:0, pro:1};
+      data.plans.sort((a,b)=>(order[a.key]??9)-(order[b.key]??9));
+
+      wrap.innerHTML = '';
+      for(const p of data.plans){
+        const card = document.createElement('article');
+        card.className = 'card';
+        card.innerHTML = planHTML(p);
+        wrap.appendChild(card);
       }
-    }
 
-    async function checkout(mode){
-      const msg = document.getElementById('msg');
-      msg.textContent = 'Doorsturen naar betaalpagina...';
-      const r = await fetch('/api/checkout', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ mode })
+      // bind checkout
+      wrap.querySelectorAll('button[data-mode]').forEach(btn=>{
+        btn.addEventListener('click', async ()=>{
+          const mode = btn.dataset.mode;
+          const note = document.getElementById('n-'+mode);
+          btn.disabled = true;
+          note.textContent = 'Doorsturen naar betaalpagina…';
+          try{
+            const r = await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode})});
+            const d = await r.json().catch(()=>({}));
+            if(r.ok && d.url){ location.href = d.url; return; }
+            note.textContent = 'Kon checkout niet starten: '+(d.error||r.statusText);
+          }catch(e){
+            note.textContent = 'Netwerkfout, probeer opnieuw.';
+          }finally{
+            btn.disabled = false;
+          }
+        });
       });
-      const data = await r.json().catch(()=>({}));
-      if (r.ok && data.url) location.href = data.url;
-      else msg.textContent = 'Mislukt: ' + (data.error || r.statusText);
-    }
 
-    loadPlans();
+      msg.textContent = '';
+    }catch(e){
+      msg.textContent = 'Kon prijzen niet laden: '+e.message;
+    }
+  }
+
+  document.getElementById('y').textContent = new Date().getFullYear();
+  loadPlans();
   </script>
 </body>
 </html>
