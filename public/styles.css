@@ -1,10 +1,27 @@
-/* Extra UI details die niet critical zijn */
-h1,h2,h3 { font-weight:800; letter-spacing:.2px }
-details { background:#0e1524; border:1px solid #18233a; border-radius:10px; padding:10px; margin:8px 0 }
-details[open] { background:#0f1a30 }
-summary { cursor:pointer; font-weight:600 }
-summary::-webkit-details-marker{display:none}
-
-@media (max-width: 640px){
-  .hero h1{ font-size:34px }
+:root{
+  --bg:#0d1117;--card:#0f1420;--line:#1f2937;--fg:#e7ecf3;--muted:#9aa4b2;
+  --brand:#4895ef;--brand2:#4cc9f0;--focus:#94d2ff;
 }
+*{box-sizing:border-box}html,body{margin:0}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--fg)}
+a{color:inherit;text-decoration:none}
+.container{max-width:1100px;margin:0 auto;padding:16px}
+button,.btn{display:inline-flex;gap:8px;align-items:center;background:linear-gradient(135deg,var(--brand),var(--brand2));color:#00101a;font-weight:800;padding:10px 14px;border-radius:12px;border:none;cursor:pointer}
+.btn.secondary{background:transparent;color:var(--fg);border:1px solid var(--line)}
+.btn:focus{outline:2px solid var(--focus);outline-offset:2px}
+header.nav{border-bottom:1px solid var(--line);background:rgba(13,17,23,.7);backdrop-filter:saturate(1.2) blur(6px)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;gap:10px;align-items:center;font-weight:900}
+.brand .dot{width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--brand2))}
+nav ul{list-style:none;padding:0;margin:0;display:flex;gap:14px}
+nav a{padding:8px 10px;border-radius:10px;color:var(--muted)}
+nav a.active,nav a:hover{background:var(--card);border:1px solid var(--line);color:var(--fg)}
+main{padding:24px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+footer{border-top:1px solid var(--line);color:var(--muted)}
+@media (max-width:780px){
+  .nav-links{display:none}
+  .nav-toggle{display:inline-flex}
+  .nav-open .nav-links{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+}
+.nav-toggle{display:none;background:transparent;border:1px solid var(--line);border-radius:10px;color:var(--fg);padding:8px}
