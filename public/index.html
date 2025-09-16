@@ -235,5 +235,20 @@
 
   <script defer src="/app.js"></script>
   <script>document.getElementById('y').textContent=new Date().getFullYear()</script>
+  <script>
+// 1) Prijzen-link forceren naar /pricing.html (werkt op elke bestaande knop/anchor)
+document.querySelectorAll('a, button').forEach(el => {
+  const txt = (el.textContent || '').trim().toLowerCase();
+  if (txt === 'prijzen' || txt.includes('prijs')) {
+    const go = () => location.href = '/pricing.html';
+    if (el.tagName === 'A') el.setAttribute('href','/pricing.html');
+    el.addEventListener('click', e => { e.preventDefault(); go(); });
+  }
+});
+
+// 2) Jaar in footer (als je een element met id="year" hebt)
+const y = document.getElementById('year');
+if (y) y.textContent = new Date().getFullYear();
+</script>
 </body>
 </html>
