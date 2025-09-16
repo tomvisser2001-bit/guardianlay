@@ -1,57 +1,95 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Prijzen — GuardianLay</title>
-  <link rel="stylesheet" href="/style.css" />
+  <meta name="description" content="Kies tussen Quick Fix (eenmalig) of Pro (maandelijks). Betaal veilig via Stripe." />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <style>
+    :root{--bg:#0d1117;--fg:#e7ecf3;--muted:#9aa4b2;--card:#0f1420;--brand:#4895ef}
+    *{box-sizing:border-box} html,body{margin:0}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .wrap{max-width:1100px;margin:0 auto;padding:24px}
+    a{color:inherit;text-decoration:none}
+    .btn{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#4895ef,#4cc9f0);color:#00101a;font-weight:800;padding:12px 16px;border-radius:12px}
+    .btn.secondary{background:transparent;color:var(--fg);border:1px solid #22304b}
+    header{display:flex;justify-content:space-between;align-items:center}
+    .grid{display:grid;gap:16px;margin-top:18px}
+    @media(min-width:900px){ .grid{grid-template-columns:1fr 1fr} }
+    .card{background:var(--card);border:1px solid #1f2937;border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px}
+    .price{font-size:34px;font-weight:900}
+    ul{margin:8px 0 0;padding:0;list-style:none}
+    li{background:#0e1524;border:1px solid #18233a;border-radius:10px;padding:8px;margin-top:8px}
+    .muted{color:var(--muted)}
+    .img{width:72px;height:72px;border-radius:12px;background:#0e1524;border:1px solid #18233a;display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .img img{max-width:100%;max-height:100%}
+    .note{margin-top:10px;color:var(--muted)}
+  </style>
 </head>
 <body>
-  <header>
-    <h1>Onze pakketten</h1>
-    <p>Kies het pakket dat bij jouw website past.</p>
-  </header>
+  <div class="wrap">
+    <header>
+      <h1 style="margin:0">Prijzen</h1>
+      <a class="btn secondary" href="/">← Terug</a>
+    </header>
 
-  <main style="display:flex;gap:20px;justify-content:center;flex-wrap:wrap;">
-    <!-- Gratis -->
-    <div class="card">
-      <h2>Gratis Scan</h2>
-      <p>Direct inzicht in je website risico’s.</p>
-      <h3>€0</h3>
-      <button onclick="location.href='/'">Start gratis</button>
-    </div>
-
-    <!-- Quick Fix -->
-    <div class="card">
-      <h2>Quick Fix Rapport</h2>
-      <p>Volledig rapport + aanbevolen fixes.</p>
-      <h3>€49 eenmalig</h3>
-      <button onclick="checkout('price_quickfix')">Koop nu</button>
-    </div>
-
-    <!-- Abonnement -->
-    <div class="card">
-      <h2>Abonnement</h2>
-      <p>Maandelijkse scans & automatische alerts.</p>
-      <h3>€19 / maand</h3>
-      <button onclick="checkout('price_subscription')">Abonneer</button>
-    </div>
-  </main>
+    <div id="plans" class="grid" aria-live="polite"></div>
+    <div id="msg" class="note"></div>
+  </div>
 
   <script>
-    async function checkout(priceId) {
-      const res = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId })
-      });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        alert('Er ging iets mis bij het starten van de betaling.');
+    async function loadPlans(){
+      const wrap = document.getElementById('plans');
+      const msg  = document.getElementById('msg');
+      msg.textContent = 'Prijzen laden...';
+      try{
+        const r = await fetch('/api/prices');
+        const data = await r.json();
+        if(!r.ok) throw new Error(data.error || 'error');
+        wrap.innerHTML = '';
+        data.plans.forEach(p=>{
+          const interval = p.interval==='one_time' ? 'eenmalig' :
+                           (p.interval==='month' ? 'per maand' : p.interval);
+          const el = document.createElement('section');
+          el.className = 'card';
+          el.innerHTML = `
+            <div style="display:flex;gap:12px;align-items:center">
+              <div class="img">${p.img ? `<img src="${p.img}" alt="">` : ''}</div>
+              <div>
+                <h2 style="margin:0">${p.name ?? (p.key==='fix'?'Quick Fix':'Pro')}</h2>
+                <div class="muted">${p.description ?? ''}</div>
+              </div>
+            </div>
+            <div class="price">€ ${p.amount.toFixed(0)} <span class="muted" style="font-size:16px"> ${interval}</span></div>
+            <ul>
+              ${p.key==='fix'
+                ? `<li>Volledig rapport + aanbevelingen</li><li>Cookies/trackers & Consent Mode v2</li><li>Security headers check</li>`
+                : `<li>Maandelijkse scan & rapportage</li><li>Alerts bij nieuwe risico's</li><li>Prioriteitssupport</li>`}
+            </ul>
+            <div><button class="btn" onclick="checkout('${p.key}')">${p.key==='fix'?'Koop Quick Fix':'Neem Pro'}</button></div>
+          `;
+          wrap.appendChild(el);
+        });
+        msg.textContent = '';
+      }catch(e){
+        msg.textContent = 'Kon prijzen niet laden: ' + e.message;
       }
     }
+
+    async function checkout(mode){
+      const msg = document.getElementById('msg');
+      msg.textContent = 'Doorsturen naar betaalpagina...';
+      const r = await fetch('/api/checkout', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ mode })
+      });
+      const data = await r.json().catch(()=>({}));
+      if (r.ok && data.url) location.href = data.url;
+      else msg.textContent = 'Mislukt: ' + (data.error || r.statusText);
+    }
+
+    loadPlans();
   </script>
 </body>
 </html>
