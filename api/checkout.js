@@ -1,42 +1,25 @@
-export const config = { runtime: 'edge' };
+import Stripe from 'stripe';
 
-function json(data, status=200){
-  return new Response(JSON.stringify(data), { status, headers:{'Content-Type':'application/json'} });
-}
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-export default async function handler(req){
-  if (req.method !== 'POST') return json({ error: 'Method Not Allowed' }, 405);
-  try{
-    const { mode } = await req.json();
-    const price = mode === 'pro' ? process.env.PRICE_PRO : process.env.PRICE_FIX;
-    const isSub = mode === 'pro';
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
 
-    if (!price || !process.env.STRIPE_SECRET_KEY) {
-      return json({ error: 'Missing Stripe env vars' }, 500);
-    }
+  try {
+    const { priceId } = req.body;
 
-    const params = new URLSearchParams();
-    params.append('mode', isSub ? 'subscription' : 'payment');
-    params.append('success_url', 'https://guardianlay.com/pricing.html?success=1');
-    params.append('cancel_url', 'https://guardianlay.com/pricing.html?canceled=1');
-    params.append('line_items[0][price]', price);
-    params.append('line_items[0][quantity]', '1');
-    params.append('allow_promotion_codes', 'true');
-
-    const r = await fetch('https://api.stripe.com/v1/checkout/sessions', {
-      method:'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`,
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: params.toString()
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [{ price: priceId, quantity: 1 }],
+      mode: priceId === 'price_subscription' ? 'subscription' : 'payment',
+      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/success.html`,
+      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/cancel.html`,
     });
 
-    const data = await r.json();
-    if (!r.ok) return json({ error: data.error?.message || 'stripe_error' }, 500);
-
-    return json({ url: data.url });
-  }catch(e){
-    return json({ error: e.message }, 500);
+    return res.status(200).json({ url: session.url });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
   }
 }
