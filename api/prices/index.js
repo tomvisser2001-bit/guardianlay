@@ -17,7 +17,7 @@ export default async function handler(req) {
   if (req.method !== 'GET') return J({ error: 'Method Not Allowed' }, 405);
   try {
     // haal beide prijzen op en include meteen het gekoppelde product
-    const ids = [process.env.PRICE_FIX, process.env.PRICE_PRO];
+    const ids = [process.env.PRICE_QUICKFIX, process.env.PRICE_PRO];
     const [fix, pro] = await Promise.all(
       ids.map(id => stripeGet(`prices/${id}?expand[]=product`))
     );
